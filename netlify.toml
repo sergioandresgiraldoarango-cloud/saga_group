@@ -1,0 +1,17 @@
+# Configuración de despliegue de SAGA Group Foundation en Netlify.
+# Sitio estático, sin build. Publica el contenido de esta carpeta tal cual.
+[build]
+  publish = "."
+  command = ""
+
+# Cabeceras básicas de seguridad/caché.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
