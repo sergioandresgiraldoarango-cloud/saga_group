@@ -154,6 +154,14 @@
     section{padding:60px 0}
     .hero{padding:70px 0 80px}
   }
+
+  /* FILM HERO — animación cinematográfica (carga diferida por rendimiento) */
+  .film-hero{width:100%;background:var(--navy);display:flex;justify-content:center}
+  .film-stage{position:relative;width:100%;aspect-ratio:16/9;max-height:80vh;overflow:hidden;background:var(--navy)}
+  .film-stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+  .film-poster{position:absolute;inset:0;transition:opacity .7s ease}
+  .film-poster svg{width:100%;height:100%;display:block}
+  @media(max-width:700px){ .film-stage{max-height:62vh} }
 </style>
 </head>
 <body>
@@ -177,6 +185,26 @@
     <button class="burger" onclick="var m=document.querySelector('nav.menu');m.style.display=(getComputedStyle(m).display==='none'?'flex':'none')">☰</button>
   </div>
 </header>
+
+<!-- FILM HERO (cinemático · carga diferida) -->
+<section class="film-hero" aria-label="SAGA — film institucional">
+  <div class="film-stage" id="filmStage">
+    <div class="film-poster" id="filmPoster">
+      <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SAGA — En pro de las artes y la cultura">
+        <rect width="1200" height="675" fill="#15204d"/>
+        <g fill="#ED1C24">
+          <rect x="70" y="70" width="26" height="2.5"/><rect x="70" y="70" width="2.5" height="26"/>
+          <rect x="1104" y="70" width="26" height="2.5"/><rect x="1127.5" y="70" width="2.5" height="26"/>
+          <rect x="70" y="602.5" width="26" height="2.5"/><rect x="70" y="579" width="2.5" height="26"/>
+          <rect x="1104" y="602.5" width="26" height="2.5"/><rect x="1127.5" y="579" width="2.5" height="26"/>
+        </g>
+        <text x="600" y="252" font-family="Arial, sans-serif" font-size="19" fill="#ED1C24" text-anchor="middle" letter-spacing="12">FUNDACIÓN GRUPO SAGA</text>
+        <text x="600" y="345" font-family="Georgia, serif" font-size="150" font-weight="600" fill="#f6f3ee" text-anchor="middle" letter-spacing="10">SAGA</text>
+        <text x="600" y="410" font-family="Georgia, serif" font-style="italic" font-size="30" fill="#cfc9bd" text-anchor="middle">En pro de las artes y la cultura</text>
+      </svg>
+    </div>
+  </div>
+</section>
 
 <!-- HERO -->
 <section class="hero" id="inicio">
@@ -316,5 +344,34 @@
   </div>
 </footer>
 
+<script>
+/* Carga diferida de la animación del hero (rendimiento). Póster estático primero;
+   la animación (React+Babel, ~500KB) se monta tras cargar la página, solo en pantallas
+   medianas+ y sin prefers-reduced-motion. En móvil/reduced-motion queda el póster. */
+(function(){
+  var stage = document.getElementById('filmStage');
+  if(!stage) return;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce || window.innerWidth < 700) return;
+  function mount(){
+    if(stage.dataset.mounted) return; stage.dataset.mounted = '1';
+    var f = document.createElement('iframe');
+    f.src = 'hero-film.html';
+    f.title = 'SAGA — film institucional';
+    f.setAttribute('scrolling','no');
+    f.setAttribute('tabindex','-1');
+    f.setAttribute('aria-hidden','true');
+    f.onload = function(){
+      var p = document.getElementById('filmPoster');
+      if(p){ p.style.opacity = '0'; setTimeout(function(){ p.style.display = 'none'; }, 750); }
+    };
+    stage.appendChild(f);
+  }
+  window.addEventListener('load', function(){
+    if('requestIdleCallback' in window){ requestIdleCallback(mount, {timeout:2500}); }
+    else { setTimeout(mount, 900); }
+  });
+})();
+</script>
 </body>
 </html>
