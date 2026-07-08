@@ -68,12 +68,15 @@
   .burger{display:none;background:none;border:0;color:var(--navy);font-size:1.6rem;cursor:pointer}
 
   /* HERO */
-  .hero{background:linear-gradient(155deg,rgba(21,32,77,.94) 0%,rgba(36,52,114,.82) 100%),url('img/foto1.jpg') center 30%/cover no-repeat;color:var(--crema);
-    position:relative;overflow:hidden;padding:96px 0 110px}
-  .hero:before{content:"";position:absolute;right:-140px;top:-140px;width:520px;height:520px;border-radius:50%;
-    background:radial-gradient(circle at center,rgba(237,28,36,.14),transparent 68%)}
-  .hero:after{content:"";position:absolute;left:-120px;bottom:-160px;width:420px;height:420px;border-radius:50%;
-    background:radial-gradient(circle at center,rgba(237,28,36,.12),transparent 70%)}
+  .hero{position:relative;min-height:100vh;overflow:hidden;color:var(--crema);display:flex;align-items:flex-end;justify-content:center;
+    background:linear-gradient(160deg,rgba(21,32,77,.68) 0%,rgba(14,22,54,.60) 100%),url('img/foto1.jpg') center 60%/cover no-repeat}
+  /* capa de animación (fondo transparente) sobre la foto */
+  .hero-film{position:absolute;inset:0;z-index:1}
+  .hero-film iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;display:block}
+  .hero-film .film-poster{position:absolute;inset:0;transition:opacity .7s ease}
+  .hero-film .film-poster svg{width:100%;height:100%;display:block}
+  /* botones (se mantienen) sobre la animación */
+  .hero-cta{position:relative;z-index:3;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;padding:0 24px 7vh}
   .hero .wrap{position:relative;z-index:2;max-width:820px}
   .hero h1{font-size:clamp(2.2rem,5.2vw,3.7rem);margin:18px 0 20px}
   .hero h1 em{color:var(--crema);font-style:normal;text-decoration:underline;text-decoration-color:var(--coral);text-decoration-thickness:3px;text-underline-offset:6px}
@@ -155,13 +158,8 @@
     .hero{padding:70px 0 80px}
   }
 
-  /* FILM HERO — animación cinematográfica (carga diferida por rendimiento) */
-  .film-hero{width:100%;background:var(--navy);display:flex;justify-content:center}
-  .film-stage{position:relative;width:100%;aspect-ratio:16/9;max-height:80vh;overflow:hidden;background:var(--navy)}
-  .film-stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
-  .film-poster{position:absolute;inset:0;transition:opacity .7s ease}
-  .film-poster svg{width:100%;height:100%;display:block}
-  @media(max-width:700px){ .film-stage{max-height:62vh} }
+  /* Hero cinematográfico — ajustes responsive */
+  @media(max-width:700px){ .hero{min-height:86vh} .hero-cta{padding-bottom:5vh} }
 </style>
 </head>
 <body>
@@ -186,41 +184,28 @@
   </div>
 </header>
 
-<!-- FILM HERO (cinemático · carga diferida) -->
-<section class="film-hero" aria-label="SAGA — film institucional">
-  <div class="film-stage" id="filmStage">
+<!-- HERO cinematográfico — animación (fondo transparente) sobre foto + degradado, pantalla completa -->
+<section class="hero" id="inicio" aria-label="SAGA — Sinergia para la Aceleración y Gestión de las Artes">
+  <!-- capa de animación; detrás se ve la foto + el degradado del .hero -->
+  <div class="hero-film" id="filmStage">
     <div class="film-poster" id="filmPoster">
-      <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SAGA — En pro de las artes y la cultura">
-        <rect width="1200" height="675" fill="#15204d"/>
+      <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SAGA — Sinergia para la Aceleración y Gestión de las Artes">
         <g fill="#ED1C24">
           <rect x="70" y="70" width="26" height="2.5"/><rect x="70" y="70" width="2.5" height="26"/>
           <rect x="1104" y="70" width="26" height="2.5"/><rect x="1127.5" y="70" width="2.5" height="26"/>
           <rect x="70" y="602.5" width="26" height="2.5"/><rect x="70" y="579" width="2.5" height="26"/>
           <rect x="1104" y="602.5" width="26" height="2.5"/><rect x="1127.5" y="579" width="2.5" height="26"/>
         </g>
-        <text x="600" y="252" font-family="Arial, sans-serif" font-size="19" fill="#ED1C24" text-anchor="middle" letter-spacing="12">FUNDACIÓN GRUPO SAGA</text>
-        <text x="600" y="345" font-family="Georgia, serif" font-size="150" font-weight="600" fill="#f6f3ee" text-anchor="middle" letter-spacing="10">SAGA</text>
-        <text x="600" y="410" font-family="Georgia, serif" font-style="italic" font-size="30" fill="#cfc9bd" text-anchor="middle">En pro de las artes y la cultura</text>
+        <text x="600" y="250" font-family="Arial, sans-serif" font-size="19" fill="#ED1C24" text-anchor="middle" letter-spacing="12">FUNDACIÓN GRUPO SAGA</text>
+        <text x="600" y="338" font-family="Georgia, serif" font-size="150" font-weight="600" fill="#f6f3ee" text-anchor="middle" letter-spacing="10">SAGA</text>
+        <text x="600" y="390" font-family="Arial, sans-serif" font-size="15" fill="#e6e0d5" text-anchor="middle" letter-spacing="4">SINERGIA PARA LA ACELERACIÓN Y GESTIÓN DE LAS ARTES</text>
+        <text x="600" y="432" font-family="Georgia, serif" font-style="italic" font-size="27" fill="#cfc9bd" text-anchor="middle">En pro de las artes y la cultura</text>
       </svg>
     </div>
   </div>
-</section>
-
-<!-- HERO -->
-<section class="hero" id="inicio">
-  <div class="wrap">
-    <p class="eyebrow">Fundación de artes y cultura · Manizales, Eje Cafetero</p>
-    <h1>Convertimos la voluntad por la cultura en <em>recursos que la hacen posible</em>.</h1>
-    <p class="lead">Somos el puente entre el sector público y el privado para gestionar, acelerar y ejecutar proyectos de artes y cultura del Eje Cafetero — con estándar profesional y rendición de cuentas.</p>
-    <div class="cta">
-      <a class="btn btn-coral" href="https://vaki.co/sinergiaparalasartesylacultura" target="_blank" rel="noopener">Quiero donar</a>
-      <a class="btn btn-linea" href="patrocinio.html" target="_blank" rel="noopener">Ser aliado / patrocinador</a>
-    </div>
-    <div class="badges">
-      <span><span class="dot"></span> Fundación legalmente constituida (ESAL)</span>
-      <span><span class="dot"></span> Sede en Manizales, Caldas</span>
-      <span><span class="dot"></span> Clúster Música &amp; Cultura</span>
-    </div>
+  <div class="hero-cta">
+    <a class="btn btn-coral" href="https://vaki.co/sinergiaparalasartesylacultura" target="_blank" rel="noopener">Quiero donar</a>
+    <a class="btn btn-linea" href="patrocinio.html" target="_blank" rel="noopener">Ser aliado / patrocinador</a>
   </div>
 </section>
 
@@ -356,7 +341,7 @@
   function mount(){
     if(stage.dataset.mounted) return; stage.dataset.mounted = '1';
     var f = document.createElement('iframe');
-    f.src = 'hero-film.html';
+    f.src = 'hero-film.html?v=3';
     f.title = 'SAGA — film institucional';
     f.setAttribute('scrolling','no');
     f.setAttribute('tabindex','-1');
