@@ -324,7 +324,11 @@
         <p>¿Eres una marca o entidad? Conecta tu responsabilidad social con la cultura del Eje y gana visibilidad en nuestros proyectos y eventos.</p>
         <p><strong style="color:var(--navy)">Beneficio tributario:</strong> los aportes a proyectos culturales avalados por CoCrea (Mincultura) permiten deducir el <strong style="color:var(--navy)">165%</strong> de la inversión en renta.</p>
         <a class="btn btn-navy" href="patrocinio.html" target="_blank" rel="noopener" style="margin-bottom:10px">Ver propuesta de patrocinio</a>
-        <a class="btn btn-linea" style="border-color:var(--navy);color:var(--navy)" href="mailto:gruposaga2022@gmail.com?subject=Quiero%20ser%20aliado%20de%20SAGA">Hablemos de alianza</a>
+        <!-- Antes era un mailto (pendiente conocido desde el 17-jul, esperando un WhatsApp institucional).
+             Ahora lleva al formulario, que YA es canal confiable (consentimiento + politica, 30-jul):
+             menos friccion que abrir el gestor de correo, y el contacto queda capturado y gobernado.
+             data-interes preselecciona el segmento para que el lead llegue ya clasificado. -->
+        <a class="btn btn-linea" style="border-color:var(--navy);color:var(--navy)" href="#contacto" data-interes="Patrocinio empresarial (CoCrea)">Hablemos de alianza</a>
       </div>
     </div>
   </div>
@@ -407,6 +411,26 @@
  * Ahora: se exige response.ok; si falla NO se resetea el formulario (los datos quedan a la vista),
  * se muestra un aviso inline con el correo institucional y el boton vuelve a habilitarse.
  */
+/* Los CTA con data-interes llevan al formulario Y preseleccionan el segmento, para que el contacto
+ * llegue ya clasificado (patrocinio CoCrea / alianza / donacion / artista) sin que la persona lo elija.
+ * Sustituye a los mailto: menos friccion y el lead queda capturado en un canal gobernado. */
+(function(){
+  var f0 = document.getElementById('sagaForm');
+  if(!f0) return;
+  document.querySelectorAll('a[data-interes]').forEach(function(a){
+    a.addEventListener('click', function(){
+      var sel = f0.querySelector('select[name="interes"]');
+      if(!sel) return;
+      var quiero = a.getAttribute('data-interes');
+      for(var i=0;i<sel.options.length;i++){
+        if(sel.options[i].text === quiero){ sel.selectedIndex = i; break; }
+      }
+      // foco en el primer campo vacio, sin robarle el scroll al ancla
+      setTimeout(function(){ if(!f0.nombre.value) f0.nombre.focus({preventScroll:true}); }, 400);
+    });
+  });
+})();
+
 (function(){
   var f = document.getElementById('sagaForm');
   if(!f) return;
