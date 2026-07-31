@@ -160,6 +160,17 @@
   .saga-form .ff-btn{width:100%;cursor:pointer}
   .ff-gracias{display:none;margin-top:16px;padding:13px;background:rgba(255,255,255,.1);border-radius:12px;text-align:center}
   .ff-gracias.show{display:block}
+  /* Aviso de error: reemplaza al alert() y NO borra lo que la persona escribio (SAGA-FORM-1) */
+  .ff-error{display:none;margin-top:16px;padding:13px;background:rgba(237,28,36,.16);border:1px solid rgba(237,28,36,.5);border-radius:12px;text-align:center;font-size:.92rem}
+  .ff-error.show{display:block}
+  /* Autorizacion de tratamiento de datos (SAGA-FORM-2) */
+  .ff-consent{display:flex;align-items:flex-start;gap:10px;margin:2px 0 16px;font-size:.82rem;line-height:1.5;opacity:.9;text-align:left}
+  .ff-consent input{width:16px;height:16px;flex:0 0 16px;margin-top:3px;accent-color:var(--coral)}
+  /* Los enlaces de este bloque van en CREMA, no en el rojo de marca: sobre el navy el rojo da ~3.6:1
+     de contraste (bajo el minimo 4.5:1 de WCAG AA) y aqui el texto es de 13px. Es el aviso legal:
+     tiene que poder leerse. El subrayado ya lo identifica como enlace. */
+  .ff-consent a{color:var(--crema);text-decoration:underline}
+  .ff-consent a:hover{color:#fff}
   .ff-alt{margin-top:22px;opacity:.85;font-size:.9rem}
   .mail-inline{color:var(--coral-2)}
   @media(max-width:600px){.ff-row{grid-template-columns:1fr}}
@@ -345,8 +356,19 @@
         </select>
       </div>
       <textarea name="mensaje" rows="4" placeholder="Cuéntanos brevemente en qué te gustaría sumarte *" required></textarea>
+
+      <!-- SAGA-FORM-2 (Codex 17-jul): el formulario pedia nombre, correo, organizacion y mensaje libre SIN
+           informar finalidad, responsable ni politica. Ley 1581/2012 exige autorizacion informada. El texto
+           aceptado viaja con el envio para que el consentimiento quede DEMOSTRABLE en el registro. -->
+      <input type="hidden" name="autorizacion_texto" value="v1 (2026-07-30): Autorizo a la Fundacion SAGA (NIT 901586052-6) a usar mis datos para responder mi solicitud y contactarme sobre su gestion cultural. Puedo pedir su eliminacion cuando quiera.">
+      <label class="ff-consent">
+        <input name="autorizacion" type="checkbox" value="SI" required>
+        <span>Autorizo a la <strong>Fundación SAGA</strong> a usar mis datos para <strong>responder mi solicitud y contactarme</strong> sobre su gestión cultural. No se comparten con terceros y puedo pedir que los eliminen escribiendo a <a href="mailto:gruposaga2022@gmail.com">gruposaga2022@gmail.com</a>. <a href="tratamiento-de-datos.html" target="_blank" rel="noopener noreferrer">Ver política de tratamiento de datos</a>.</span>
+      </label>
+
       <button type="submit" class="btn btn-coral ff-btn">Enviar mensaje</button>
       <p class="ff-gracias" id="ffGracias">¡Gracias! Recibimos tu mensaje y te contactaremos pronto. 💛</p>
+      <p class="ff-error" id="ffError">No pudimos registrar tu mensaje. Tus datos siguen aquí — puedes reintentar, o escribirnos directo a <a class="mail-inline" href="mailto:gruposaga2022@gmail.com">gruposaga2022@gmail.com</a>.</p>
     </form>
 
     <p class="ff-alt">O escríbenos a <a class="mail-inline" href="mailto:gruposaga2022@gmail.com">gruposaga2022@gmail.com</a></p>
@@ -369,12 +391,22 @@
     </div>
   </div>
   <div class="wrap" style="margin-top:24px;border-top:1px solid rgba(255,255,255,.1);padding-top:20px">
-    <small>© 2026 SAGA Group Foundation. Todos los derechos reservados.</small>
+    <small>© 2026 SAGA Group Foundation. Todos los derechos reservados. ·
+    <a href="tratamiento-de-datos.html" style="color:rgba(246,243,238,.85)">Tratamiento de datos</a></small>
   </div>
 </footer>
 
 <script>
-/* Envío del formulario de contacto por AJAX a Netlify Forms (muestra "gracias" sin recargar). */
+/* Envío del formulario de contacto por AJAX a Netlify Forms.
+ *
+ * SAGA-FORM-1 (Codex 17-jul) CORREGIDO: antes el .then() se ejecutaba ante CUALQUIER respuesta HTTP
+ * — fetch no rechaza ante 4xx/5xx, solo ante fallo de red. El formulario mostraba "Enviado ✓" y ADEMAS
+ * hacia f.reset(), borrando lo que la persona escribio, aunque Netlify no hubiera guardado nada.
+ * Se perdian en silencio contactos de patrocinio y alianza.
+ *
+ * Ahora: se exige response.ok; si falla NO se resetea el formulario (los datos quedan a la vista),
+ * se muestra un aviso inline con el correo institucional y el boton vuelve a habilitarse.
+ */
 (function(){
   var f = document.getElementById('sagaForm');
   if(!f) return;
@@ -382,16 +414,21 @@
     e.preventDefault();
     var body = new URLSearchParams(new FormData(f)).toString();
     var btn = f.querySelector('.ff-btn');
+    var gracias = document.getElementById('ffGracias');
+    var error = document.getElementById('ffError');
+    if(error) error.classList.remove('show');
     if(btn){ btn.disabled = true; btn.textContent = 'Enviando…'; }
     fetch('/', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:body})
-      .then(function(){
+      .then(function(r){
+        if(!r.ok){ throw new Error('HTTP ' + r.status); }   // sin esto, un 500 se veia como exito
         f.reset();
-        var g = document.getElementById('ffGracias'); if(g) g.classList.add('show');
+        if(gracias) gracias.classList.add('show');
         if(btn){ btn.textContent = 'Enviado ✓'; }
       })
       .catch(function(){
-        if(btn){ btn.disabled = false; btn.textContent = 'Enviar mensaje'; }
-        alert('No se pudo enviar. Escríbenos por correo, por favor.');
+        // NO se llama f.reset(): la persona conserva lo que escribio y puede reintentar.
+        if(error) error.classList.add('show');
+        if(btn){ btn.disabled = false; btn.textContent = 'Reintentar envío'; }
       });
   });
 })();
